@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+
+	<!-- totalRecord 전체 게시물의 수 -->
+	<select id="t_count" resultType="int">
+		SELECT count(*) FROM board
+	</select>
+
+	<!-- 리스트 -->
+	<select id="list" parameterType="Map" resultType="com.ict.db.VO">
+		SELECT * FROM (SELECT rownum r_num, a.* FROM (SELECT * FROM board ORDER BY groups DESC, lev ASC) a ) WHERE r_num BETWEEN #{begin} AND #{end}
+	</select>
+
+	<!-- 게시글 작성 -->
+	<insert id="write" parameterType="com.ict.db.VO">
+		INSERT INTO board VALUES(board_seq.nextval, #{writer}, #{title}, #{content}, #{pwd}, 0, group_seq.nextval, 0, 0, SYSDATE, #{file_name})
+	</insert>
+
+	<!-- 조회수 처리 -->
+	<update id="hitup" parameterType="String">
+		UPDATE board SET hit = (hit + 1) WHERE idx = #{idx}
+	</update>
+	
+	<!-- onelist 조회 -->
+	<select id="onelist" parameterType="String" resultType="com.ict.db.VO">
+		SELECT * FROM board WHERE idx = #{idx}
+	</select>
+	
+	<!-- 업데이트 -->
+	<update id="update" parameterType="com.ict.db.VO">
+		UPDATE board SET writer=#{writer}, title=#{title}, content=#{content}, file_name=#{file_name} WHERE idx = #{idx}
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="delete" parameterType="String">
+		DELETE FROM board WHERE idx = #{idx}
+	</delete>
+	
+	<!-- 댓글 lev 업데이트 -->
+	<update id="levup" parameterType="Map">
+		UPDATE board SET lev = (lev + 1) WHERE groups = #{groups} AND lev >= #{lev}
+	</update>
+	
+	<!-- 댓글 삽입 -->
+	<insert id="re_write" parameterType="com.ict.db.VO">
+		INSERT INTO board VALUES(board_seq.nextval, #{writer}, #{title}, #{content}, #{pwd}, 0, #{groups}, #{step}, #{lev}, SYSDATE, #{file_name})
+	</insert>
+
+</mapper>
